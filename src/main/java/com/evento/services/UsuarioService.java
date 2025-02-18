@@ -53,5 +53,20 @@ public class UsuarioService {
         return converterUsuarioParaUsuarioDTO(usuario);
     }
 
+    public UsuarioDTO atualizarUsuario(UsuarioDTO usuarioDTO){
+        Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Usuário não encontrado"));
+
+        usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
+        usuarioRepository.save(usuario);
+        return converterUsuarioParaUsuarioDTO(usuario);
+    }
+
+    public UsuarioDTO buscarUsuarioPorEmail(String email){
+        Usuario usuario = usuarioRepository.findByEmail(email);
+        return converterUsuarioParaUsuarioDTO(usuario);
+    }
+
 
 }
