@@ -47,11 +47,6 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    /*public UsuarioDTO buscarUsuarioPorId(Long id){
-        Usuario usuario = usuarioRepository.findById(id).get();
-        return converterUsuarioParaUsuarioDTO(usuario);
-    }*/
-
     public UsuarioDTO buscarUsuarioPorId(Long id){
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
