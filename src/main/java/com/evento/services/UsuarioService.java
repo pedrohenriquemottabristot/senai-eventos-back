@@ -15,6 +15,9 @@ public class UsuarioService {
     UsuarioRepository usuarioRepository;
 
     public UsuarioDTO cadastrarUsuario(UsuarioDTO usuarioDTO){
+        if(Objects.isNull(usuarioRepository.findByEmail(usuarioDTO.getEmail()))){
+            throw new BusinessException("Usuário já cadastrado com esse email.");
+        }
         Usuario usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
         return converterUsuarioParaUsuarioDTO(usuario);
@@ -52,7 +55,7 @@ public class UsuarioService {
 
     public UsuarioDTO buscarUsuarioPorId(Long id){
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
         return converterUsuarioParaUsuarioDTO(usuario);
     }
 
@@ -63,7 +66,7 @@ public class UsuarioService {
         }
         Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
                 .orElseThrow(() ->
-                        new IllegalArgumentException("Usuário não encontrado"));
+                        new BusinessException("Usuário não encontrado"));
 
         usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuarioRepository.save(usuario);

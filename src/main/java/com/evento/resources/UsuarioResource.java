@@ -21,6 +21,8 @@ public class UsuarioResource {
 
     @PostMapping()
     public ResponseEntity<UsuarioDTO> cadastrarUsuario(@RequestBody UsuarioDTO usuarioDTO){
+
+
         UsuarioDTO usuario = usuarioService.cadastrarUsuario(usuarioDTO);
         return ResponseEntity.ok(usuario);
     }
