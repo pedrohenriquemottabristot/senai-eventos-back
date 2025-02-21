@@ -1,23 +1,39 @@
 package com.evento.services;
 
 import com.evento.dtos.UsuarioDTO;
-import com.evento.exceptions.BusinessException;
+import com.evento.exceptions.BussinesException;
 import com.evento.models.Usuario;
 import com.evento.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
+    private static final String MSG_EMAIL = "Usuário já cadastrado com email: %s.";
+    private static final String MSG_CPF = "Usuário já cadastrado com CPF: %s.";
     @Autowired
     UsuarioRepository usuarioRepository;
 
     public UsuarioDTO cadastrarUsuario(UsuarioDTO usuarioDTO){
-        if(Objects.isNull(usuarioRepository.findByEmail(usuarioDTO.getEmail()))){
-            throw new BusinessException("Usuário já cadastrado com esse email.");
+
+        Usuario usuarioEmail = usuarioRepository
+                .findByEmail(usuarioDTO.getEmail());
+
+        Optional<Usuario> usuarioCpf = usuarioRepository
+                .findByCpf(usuarioDTO.getCpf());
+
+        if (Objects.nonNull(usuarioEmail)){
+            throw new BussinesException(
+                    String.format(MSG_EMAIL,usuarioDTO.getEmail()));
         }
+        if (Objects.nonNull(usuarioCpf)){
+            throw new BussinesException(
+                    String.format(MSG_CPF,usuarioDTO.getCpf()));
+        }
+
         Usuario usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
         return converterUsuarioParaUsuarioDTO(usuario);
@@ -55,18 +71,18 @@ public class UsuarioService {
 
     public UsuarioDTO buscarUsuarioPorId(Long id){
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Usuário não encontrado"));
+                .orElseThrow(() -> new BussinesException("Usuário não encontrado"));
         return converterUsuarioParaUsuarioDTO(usuario);
     }
 
     public UsuarioDTO atualizarUsuario(UsuarioDTO usuarioDTO){
 
-        if(Objects.isNull(usuarioDTO.getId())){
-            throw new BusinessException("Id do usuário não pode ser nulo");
-        }
+        if (Objects.isNull(usuarioDTO.getId()))
+            throw new BussinesException("Id não pode ser nulo");
+
         Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
                 .orElseThrow(() ->
-                        new BusinessException("Usuário não encontrado"));
+                        new BussinesException("Usuário não encontrado"));
 
         usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuarioRepository.save(usuario);
