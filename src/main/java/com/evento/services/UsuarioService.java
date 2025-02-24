@@ -4,6 +4,7 @@ import com.evento.dtos.UsuarioDTO;
 import com.evento.exceptions.BussinesException;
 import com.evento.models.Usuario;
 import com.evento.repositories.UsuarioRepository;
+import com.evento.specs.UsuarioSpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,23 +13,21 @@ import java.util.Optional;
 
 @Service
 public class UsuarioService {
-    private static final String MSG_EMAIL = "Usuário já cadastrado com email: %s.";
     private static final String MSG_CPF = "Usuário já cadastrado com CPF: %s.";
     @Autowired
     UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioSpec usuarioSpec;
 
     public UsuarioDTO cadastrarUsuario(UsuarioDTO usuarioDTO){
 
         Usuario usuarioEmail = usuarioRepository
                 .findByEmail(usuarioDTO.getEmail());
 
+       usuarioSpec.veificarSeExisteUsuarioComEmailDuplicado(usuarioEmail);
         Optional<Usuario> usuarioCpf = usuarioRepository
                 .findByCpf(usuarioDTO.getCpf());
 
-        if (Objects.nonNull(usuarioEmail)){
-            throw new BussinesException(
-                    String.format(MSG_EMAIL,usuarioDTO.getEmail()));
-        }
         if (Objects.nonNull(usuarioCpf)){
             throw new BussinesException(
                     String.format(MSG_CPF,usuarioDTO.getCpf()));
