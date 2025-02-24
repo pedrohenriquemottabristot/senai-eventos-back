@@ -9,29 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
-    private static final String MSG_CPF = "Usuário já cadastrado com CPF: %s.";
     @Autowired
-    UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
+
     @Autowired
     private UsuarioSpec usuarioSpec;
 
-    public UsuarioDTO cadastrarUsuario(UsuarioDTO usuarioDTO){
+    public UsuarioDTO cadastrarUsuario(UsuarioDTO usuarioDTO) {
 
-        Usuario usuarioEmail = usuarioRepository
-                .findByEmail(usuarioDTO.getEmail());
 
-       usuarioSpec.veificarSeExisteUsuarioComEmailDuplicado(usuarioEmail);
-        Optional<Usuario> usuarioCpf = usuarioRepository
-                .findByCpf(usuarioDTO.getCpf());
+        Usuario usuarioEmail = usuarioRepository.findByEmail(usuarioDTO.getEmail());
+        usuarioSpec.veificarSeExisteUsuarioComEmailDuplicado(usuarioEmail);
 
-        if (Objects.nonNull(usuarioCpf)){
-            throw new BussinesException(
-                    String.format(MSG_CPF,usuarioDTO.getCpf()));
-        }
+        Usuario usuarioCpf = usuarioRepository.findByCpf(usuarioDTO.getCpf()).orElse(null);
+        usuarioSpec.veificarSeExisteUsuarioComCpfDuplicado(usuarioCpf);
 
         Usuario usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuario = usuarioRepository.save(usuario);
@@ -51,7 +45,7 @@ public class UsuarioService {
         return usuarioDTO;
     }
 
-    public Usuario converterUsuarioDTOParaUsuario(UsuarioDTO usuarioDTO){
+    public Usuario converterUsuarioDTOParaUsuario(UsuarioDTO usuarioDTO) {
         Usuario usuario = new Usuario();
         usuario.setId(usuarioDTO.getId());
         usuario.setNome(usuarioDTO.getNome());
@@ -64,34 +58,30 @@ public class UsuarioService {
         return usuario;
     }
 
-    public void deletarUsuario(Long id){
+    public void deletarUsuario(Long id) {
         usuarioRepository.deleteById(id);
     }
 
-    public UsuarioDTO buscarUsuarioPorId(Long id){
+    public UsuarioDTO buscarUsuarioPorId(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new BussinesException("Usuário não encontrado"));
         return converterUsuarioParaUsuarioDTO(usuario);
     }
 
-    public UsuarioDTO atualizarUsuario(UsuarioDTO usuarioDTO){
-
+    public UsuarioDTO atualizarUsuario(UsuarioDTO usuarioDTO) {
         if (Objects.isNull(usuarioDTO.getId()))
             throw new BussinesException("Id não pode ser nulo");
 
         Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
-                .orElseThrow(() ->
-                        new BussinesException("Usuário não encontrado"));
+                .orElseThrow(() -> new BussinesException("Usuário não encontrado"));
 
         usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuarioRepository.save(usuario);
         return converterUsuarioParaUsuarioDTO(usuario);
     }
 
-    public UsuarioDTO buscarUsuarioPorEmail(String email){
+    public UsuarioDTO buscarUsuarioPorEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email);
         return converterUsuarioParaUsuarioDTO(usuario);
     }
-
-
 }
