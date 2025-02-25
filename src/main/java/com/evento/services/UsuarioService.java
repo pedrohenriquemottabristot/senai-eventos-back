@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static java.util.Objects.nonNull;
+
 @Service
 public class UsuarioService {
     @Autowired
@@ -75,6 +77,12 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(usuarioDTO.getId())
                 .orElseThrow(() -> new BussinesException("Usuário não encontrado"));
 
+        if ((!usuario.getEmail().equals(usuarioDTO.getEmail()))
+                && (nonNull(usuarioRepository.findByEmail(usuarioDTO.getEmail())))) {
+            throw new BussinesException(String.format("Email já cadastrado com email: %s"
+                    , usuarioDTO.getEmail()));
+
+        }
         usuario = converterUsuarioDTOParaUsuario(usuarioDTO);
         usuarioRepository.save(usuario);
         return converterUsuarioParaUsuarioDTO(usuario);
